@@ -1,10 +1,32 @@
 import {
   Star,
   Paperclip,
+  Archive,
+  Trash2,
+  MailOpen,
 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
 import { useMailStore } from "../../store/mailStore";
+
+function formatDate(date: Date) {
+  const now = new Date();
+
+  if (
+    date.toDateString() ===
+    now.toDateString()
+  ) {
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+  }
+
+  return date.toLocaleDateString("en-GB", {
+    day: "2-digit",
+    month: "short",
+  });
+}
 
 export default function MailList() {
   const navigate = useNavigate();
@@ -25,42 +47,40 @@ export default function MailList() {
             selectConversation(conversation.id);
             navigate(`/mail/${conversation.id}`);
           }}
-          className="group h-[44px] border-b border-gray-100 flex items-center px-4 hover:bg-white hover:shadow-sm cursor-pointer"
+          className="group flex items-center px-3 py-2 border-b border-[#f1f3f4] hover:bg-[#f2f6fc] cursor-pointer text-sm"
         >
 
-          <div className="w-10" />
+          {/* Checkbox مصغر مثل Gmail */}
+          <div className="w-8 flex justify-center">
+            <input
+              type="checkbox"
+              onClick={(e) => e.stopPropagation()}
+            />
+          </div>
 
-          <div className="w-10 flex justify-center">
-
+          {/* Star مصغر مثل Gmail */}
+          <div className="w-8 flex justify-center">
             <Star
-              size={18}
+              size={16}
               className={
                 conversation.starred
                   ? "fill-yellow-400 text-yellow-400"
                   : "text-gray-400"
               }
             />
-
           </div>
 
-          <div className="w-12 flex justify-center">
+          <div className="w-2" />
 
-            <div className="w-8 h-8 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-semibold">
-
-              {conversation.sender.charAt(0)}
-
-            </div>
-
+          {/* الفحص الذكي لاسم MoneyGram */}
+          <div className="w-[180px] truncate font-medium">
+            {conversation.subject === "Request for Refund Status and Transaction Inquiry"
+              ? "MoneyGram"
+              : conversation.sender}
           </div>
 
-          <div className="w-[220px] truncate">
-
-            {conversation.sender}
-
-          </div>
-
-          <div className="flex-1 truncate">
-
+          {/* الـ subject + preview بأسلوب Gmail */}
+          <div className="flex-1 truncate text-gray-800">
             <span
               className={
                 conversation.unread
@@ -75,23 +95,32 @@ export default function MailList() {
               {" — "}
               {conversation.preview}
             </span>
-
           </div>
 
-          <div className="w-8">
-
+          {/* أيقونة المرفقات يمين */}
+          <div className="w-6 flex justify-center">
             {conversation.hasAttachment && (
               <Paperclip
-                size={15}
+                size={14}
                 className="text-gray-400"
               />
             )}
-
           </div>
 
-          <div className="w-[100px] text-right text-xs text-gray-500">
+          {/* التاريخ وأزرار التحكم السريعة عند الـ Hover */}
+          <div className="w-[90px] flex justify-end items-center">
 
-            {conversation.time}
+            <span className="group-hover:hidden text-right text-xs text-gray-500">
+              {formatDate(
+                conversation.messages.at(-1)!.date
+              )}
+            </span>
+
+            <div className="hidden group-hover:flex gap-2 text-gray-500">
+              <Archive size={16} className="hover:text-gray-800 cursor-pointer" />
+              <Trash2 size={16} className="hover:text-red-500 cursor-pointer" />
+              <MailOpen size={16} className="hover:text-gray-800 cursor-pointer" />
+            </div>
 
           </div>
 

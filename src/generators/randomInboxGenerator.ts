@@ -1,151 +1,5 @@
 import type { Mail } from "../models/mail";
-
-const senders = [
-  {
-    name: "Google Security",
-    email: "no-reply@accounts.google.com",
-    subjects: [
-      "Security alert",
-      "Password changed",
-      "New sign-in detected",
-    ],
-  },
-  {
-    name: "Amazon",
-    email: "shipment@amazon.com",
-    subjects: [
-      "Your order has shipped",
-      "Package delivered",
-      "Delivery update",
-    ],
-  },
-  {
-    name: "TikTok",
-    email: "security@tiktok.com",
-    subjects: [
-      "New login detected",
-      "Account notification",
-      "Security notice",
-    ],
-  },
-  {
-    name: "Facebook",
-    email: "security@facebookmail.com",
-    subjects: [
-      "Login alert",
-      "Security check",
-      "New device connected",
-    ],
-  },
-  {
-    name: "Instagram",
-    email: "security@mail.instagram.com",
-    subjects: [
-      "New login",
-      "Password reset",
-      "Security notification",
-    ],
-  },
-  {
-    name: "Microsoft",
-    email: "account-security-noreply@account.microsoft.com",
-    subjects: [
-      "Security alert",
-      "Password updated",
-      "New sign in",
-    ],
-  },
-  {
-    name: "Apple",
-    email: "appleid@id.apple.com",
-    subjects: [
-      "Apple ID notification",
-      "New device",
-      "Security update",
-    ],
-  },
-  {
-    name: "PayPal",
-    email: "service@paypal.com",
-    subjects: [
-      "Payment received",
-      "Security notice",
-      "Account update",
-    ],
-  },
-  {
-    name: "LinkedIn",
-    email: "messages-noreply@linkedin.com",
-    subjects: [
-      "New connection",
-      "Job recommendation",
-      "Profile viewed",
-    ],
-  },
-  {
-    name: "Discord",
-    email: "noreply@discord.com",
-    subjects: [
-      "Login detected",
-      "Security notice",
-      "New device",
-    ],
-  },
-  {
-    name: "Netflix",
-    email: "info@netflix.com",
-    subjects: [
-      "New sign in",
-      "Subscription updated",
-      "Payment reminder",
-    ],
-  },
-  {
-    name: "Binance",
-    email: "do-not-reply@binance.com",
-    subjects: [
-      "Withdrawal confirmation",
-      "Security verification",
-      "New login",
-    ],
-  },
-  {
-    name: "GitHub",
-    email: "noreply@github.com",
-    subjects: [
-      "New sign in",
-      "Repository invitation",
-      "Security alert",
-    ],
-  },
-  {
-    name: "Dropbox",
-    email: "no-reply@dropbox.com",
-    subjects: [
-      "New login",
-      "File shared with you",
-      "Storage update",
-    ],
-  },
-  {
-    name: "Zoom",
-    email: "no-reply@zoom.us",
-    subjects: [
-      "Meeting reminder",
-      "Meeting invitation",
-      "Account security",
-    ],
-  },
-  {
-    name: "Steam",
-    email: "noreply@steampowered.com",
-    subjects: [
-      "Steam Guard",
-      "New login",
-      "Purchase receipt",
-    ],
-  },
-];
+import { companies } from "../data/companyData";
 
 function random(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -159,51 +13,86 @@ function randomTime() {
   }`;
 }
 
+const attachments = [
+  "invoice.pdf",
+  "receipt.pdf",
+  "statement.pdf",
+  "photo.jpg",
+  "document.docx",
+  "report.xlsx",
+  "archive.zip",
+];
+
 export function generateRandomInbox(
   email: string
 ): Mail[] {
-  const shuffled = [...senders].sort(
+  const shuffled = [...companies].sort(
     () => Math.random() - 0.5
   );
 
-  const count = random(3, 7);
+  return shuffled
+    .slice(0, random(5, 12))
+    .map((company) => {
+      const subject =
+        company.subjects[
+          random(0, company.subjects.length - 1)
+        ];
 
-  return shuffled.slice(0, count).map((company) => {
-    const subject =
-      company.subjects[
-        random(0, company.subjects.length - 1)
-      ];
+      const attachment =
+        attachments[
+          random(0, attachments.length - 1)
+        ];
 
-    return {
-      id: crypto.randomUUID(),
+      const hasAttachment =
+        Math.random() > 0.75;
 
-      sender: company.name,
-      senderEmail: company.email,
+      return {
+        id: crypto.randomUUID(),
 
-      from: company.email,
-      to: email,
+        sender: company.name,
 
-      subject,
+        senderEmail: company.email,
 
-      preview: subject,
+        from: company.email,
 
-      body: `${subject}
+        to: email,
 
-This is an automatically generated email.`,
+        subject,
 
-      time: randomTime(),
+        preview: subject,
 
-      date: new Date(),
+        body: `${subject}
 
-      unread: Math.random() > 0.5,
+This email was automatically generated for the AMail demo.
 
-      read: Math.random() > 0.5,
+Thank you for using ${company.name}.`,
 
-      starred: Math.random() > 0.8,
+        time: randomTime(),
 
-      hasAttachment: Math.random() > 0.75,
+        date: new Date(
+          Date.now() -
+            random(1, 180) *
+              24 *
+              60 *
+              60 *
+              1000
+        ),
 
-      attachments: Math.random() > 0.75 ? ["document.pdf"] : [],
-    };
-  });
+        unread: Math.random() > 0.5,
+
+        read: Math.random() > 0.5,
+
+        starred: Math.random() > 0.8,
+
+        hasAttachment,
+
+        attachments: hasAttachment
+          ? [attachment]
+          : [],
+
+        direction: "incoming",
+
+        status: "received",
+      };
+    });
 }

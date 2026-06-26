@@ -33,5 +33,9 @@ Google Accounts Team`,
     hasAttachment: false,
 
     attachments: [],
+
+    direction: "incoming",
+
+    status: "received",
   };
 }

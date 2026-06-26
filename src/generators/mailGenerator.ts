@@ -45,5 +45,9 @@ export function generateSentMail(
     attachments: [],
 
     date: new Date("2026-02-23T22:00:00"),
+
+    direction: "outgoing",
+
+    status: "sent",
   };
 }

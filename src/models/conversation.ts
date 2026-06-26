@@ -15,6 +15,11 @@ export interface Conversation {
 
   senderEmail: string;
 
+  // الإضافة الجديدة هنا: تحديد نوع المرسل
+  senderType:
+    | "company"
+    | "person";
+
   preview: string;
 
   time: string;

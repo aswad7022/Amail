@@ -25,13 +25,13 @@ TikTok Security Team`,
     date: new Date("2026-02-21T15:18:00"),
 
     unread: true,
-
     read: false,
 
     starred: false,
-
     hasAttachment: false,
-
     attachments: [],
+
+    direction: "incoming",
+    status: "received",
   };
 }

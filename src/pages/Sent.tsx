@@ -2,6 +2,7 @@ import { useNavigate } from "react-router-dom";
 
 import { useAccountStore } from "../store/accountStore";
 import { useMailStore } from "../store/mailStore";
+import { buildConversation } from "../generators/conversationGenerator";
 
 export default function Sent() {
   const navigate = useNavigate();
@@ -10,7 +11,8 @@ export default function Sent() {
     (state) => state.currentAccount
   );
 
-  const { setConversations } = useMailStore();
+  // التعديل الأول: استبدال setConversations بـ openConversation
+  const { openConversation } = useMailStore();
 
   const mails = account?.sent ?? [];
 
@@ -24,8 +26,14 @@ export default function Sent() {
           <div
             key={mail.id}
             onClick={() => {
-              setConversations([]);
-              navigate(`/mail/${mail.id}`);
+              // التعديل الثاني: فتح المحادثة دون مسح الـ Inbox والـ الانتقال للرابط
+              const conversation = buildConversation([mail]);
+
+              openConversation(conversation);
+
+              navigate(
+                `/mail/${conversation.id}`
+              );
             }}
             className="px-5 py-4 border-b hover:bg-gray-50 cursor-pointer"
           >
@@ -35,7 +43,7 @@ export default function Sent() {
             </div>
 
             <div className="text-sm text-gray-500">
-              {mail.to}
+              To: {mail.to}
             </div>
 
             <div className="text-sm text-gray-600">
@@ -43,6 +51,7 @@ export default function Sent() {
             </div>
 
             <div className="text-xs text-gray-400">
+              {mail.date.toLocaleDateString()}{" "}
               {mail.time}
             </div>
 

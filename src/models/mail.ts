@@ -1,3 +1,12 @@
+export type MailDirection =
+  | "incoming"
+  | "outgoing";
+
+export type MailStatus =
+  | "sent"
+  | "delivered"
+  | "received";
+
 export interface Mail {
   id: string;
 
@@ -28,4 +37,10 @@ export interface Mail {
   attachments: string[];
 
   date: Date;
+
+  direction: MailDirection;
+
+  status: MailStatus;
+
+  replyTo?: string;
 }

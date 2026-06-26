@@ -6,6 +6,20 @@ export function buildConversation(
 ): Conversation {
   const last = messages[messages.length - 1];
 
+  // تعريف قائمة الشركات لتمييز نوع المرسل بشكل تلقائي واحترافي
+  const companies = [
+    "MoneyGram Customer Service",
+    "Spotify",
+    "Google Photos",
+    "Apple",
+    "PayPal",
+    "Amazon",
+    "Google Drive",
+    "Netflix",
+    "Discord",
+    "Microsoft",
+  ];
+
   return {
     id: crypto.randomUUID(),
 
@@ -14,6 +28,11 @@ export function buildConversation(
     sender: last.sender,
 
     senderEmail: last.senderEmail,
+
+    // التحقق من نوع المرسل وتعيينه بناءً على القائمة أعلاه
+    senderType: companies.includes(last.sender)
+      ? "company"
+      : "person",
 
     preview: last.preview,
 

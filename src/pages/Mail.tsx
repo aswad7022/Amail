@@ -2,10 +2,16 @@ import {
   ArrowLeft,
   Reply,
   Forward,
+  Send,
 } from "lucide-react";
 
 import { useNavigate } from "react-router-dom";
 import { useMailStore } from "../store/mailStore";
+
+import { useState } from "react";
+import { useAccountStore } from "../store/accountStore";
+import { generateAutoReply } from "../generators/autoReplyGenerator";
+import type { Mail as MailType } from "../models/mail";
 
 function formatDate(date: Date) {
   return date.toLocaleString("en-US", {
@@ -21,8 +27,78 @@ function formatDate(date: Date) {
 export default function Mail() {
   const navigate = useNavigate();
 
-  const { selectedConversation } =
-    useMailStore();
+  const {
+    selectedConversation,
+    replyToConversation,
+  } = useMailStore();
+
+  const { currentAccount } = useAccountStore();
+
+  const [reply, setReply] = useState("");
+  const [isReplying, setIsReplying] = useState(false);
+
+  const sendReply = () => {
+    if (
+      !currentAccount ||
+      !selectedConversation ||
+      !reply.trim()
+    ) {
+      return;
+    }
+
+    const now = new Date();
+
+    const mail: MailType = {
+      id: crypto.randomUUID(),
+      subject: selectedConversation.subject,
+      body: reply,
+      from: currentAccount.email,
+      to: "customerservice@moneygram.com",
+      sender: currentAccount.fullName,
+      senderEmail: currentAccount.email,
+      preview: reply.substring(0, 80),
+      time: now.toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+      }),
+      unread: false,
+      read: true,
+      starred: false,
+      hasAttachment: false,
+      attachments: [],
+      date: now,
+      direction: "outgoing",
+      status: "sent",
+    };
+
+    // إرسال ردك الحالي فوراً
+    replyToConversation(
+      selectedConversation.id,
+      mail
+    );
+
+    setReply("");
+    setIsReplying(false);
+
+    // تعريف وقت التأخير: 10 دقائق حقيقية (10 * 60 * 1000 مللي ثانية)
+    const AUTO_REPLY_DELAY = 10 * 60 * 1000;
+
+    // تشغيل المؤقت لإرسال الرد التلقائي بعد 10 دقائق
+    setTimeout(() => {
+      const autoReply =
+        generateAutoReply(
+          currentAccount,
+          selectedConversation.subject,
+          now
+        );
+
+      replyToConversation(
+        selectedConversation.id,
+        autoReply
+      );
+    }, AUTO_REPLY_DELAY);
+  };
 
   if (!selectedConversation) {
     return (
@@ -73,8 +149,13 @@ export default function Mail() {
                     {mail.sender}
                   </div>
 
+                  {/* التعديل المحدث لعرض To: بالشكل المطلوب بالملّي */}
                   <div className="text-sm text-gray-500">
-                    {mail.senderEmail}
+                    {mail.direction === "outgoing" ? (
+                      `To: ${mail.to}`
+                    ) : (
+                      mail.senderEmail
+                    )}
                   </div>
 
                   <div className="text-xs text-gray-400">
@@ -93,17 +174,53 @@ export default function Mail() {
 
           ))}
 
-          <div className="flex gap-3">
+          <div className="mt-8">
 
-            <button className="px-6 py-3 rounded-full border flex items-center gap-2">
-              <Reply size={18} />
-              Reply
-            </button>
+            {!isReplying && (
+              <div className="flex gap-3">
 
-            <button className="px-6 py-3 rounded-full border flex items-center gap-2">
-              <Forward size={18} />
-              Forward
-            </button>
+                <button
+                  onClick={() => setIsReplying(true)}
+                  className="px-6 py-3 rounded-full border flex items-center gap-2 hover:bg-gray-100"
+                >
+                  <Reply size={18} />
+                  Reply
+                </button>
+
+                <button
+                  className="px-6 py-3 rounded-full border flex items-center gap-2 hover:bg-gray-100"
+                >
+                  <Forward size={18} />
+                  Forward
+                </button>
+
+              </div>
+            )}
+
+            {isReplying && (
+              <div className="space-y-4">
+
+                <textarea
+                  value={reply}
+                  onChange={(e) => setReply(e.target.value)}
+                  placeholder="Write your reply..."
+                  className="w-full h-40 border rounded-xl p-4 resize-none outline-none"
+                />
+
+                <div className="flex justify-end">
+
+                  <button
+                    onClick={sendReply}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-full flex items-center gap-2"
+                  >
+                    <Send size={18} />
+                    Send
+                  </button>
+
+                </div>
+
+              </div>
+            )}
 
           </div>
 
