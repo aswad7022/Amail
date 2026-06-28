@@ -48,7 +48,7 @@ function moneygramReply(
 
   return {
 
-    id: crypto.randomUUID(),
+    id: Math.random().toString(36).slice(2) + Date.now(),
 
 
 
@@ -304,5 +304,4 @@ export function generateTimeline(
 
   }
 
-} 
-
+}

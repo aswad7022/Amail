@@ -30,6 +30,9 @@ export function generateRandomInbox(
     () => Math.random() - 0.5
   );
 
+  // تعريف التاريخ الأساسي القريب من فترة المشروع
+  const baseDate = new Date("2026-02-23T22:00:00");
+
   return shuffled
     .slice(0, random(5, 12))
     .map((company) => {
@@ -47,7 +50,7 @@ export function generateRandomInbox(
         Math.random() > 0.75;
 
       return {
-        id: crypto.randomUUID(),
+        id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
 
         sender: company.name,
 
@@ -69,9 +72,10 @@ Thank you for using ${company.name}.`,
 
         time: randomTime(),
 
+        // استبدال الحساب القديم بالتعديل الجديد المعتمد على baseDate
         date: new Date(
-          Date.now() -
-            random(1, 180) *
+          baseDate.getTime() +
+            random(-60, 30) *
               24 *
               60 *
               60 *

@@ -8,10 +8,9 @@ interface MailStore {
   allConversations: Conversation[];
   selectedConversation: Conversation | null;
   selectedMail: Mail | null;
+  search: string; // إضافة حالة البحث داخل الـ interface
   setConversations: (conversations: Conversation[]) => void;
   addConversation: (conversation: Conversation) => void;
-  
-  // الإضافة هنا داخل الـ interface
   openConversation: (conversation: Conversation) => void;
 
   replyToConversation: (
@@ -24,6 +23,7 @@ interface MailStore {
   ) => void;
 
   selectConversation: (id: string) => void;
+  setSearch: (search: string) => void; // إضافة الـ Action داخل الـ interface
 }
 
 export const useMailStore = create<MailStore>((set, get) => ({
@@ -31,6 +31,7 @@ export const useMailStore = create<MailStore>((set, get) => ({
   allConversations: [],
   selectedConversation: null,
   selectedMail: null,
+  search: "", // إضافة القيمة الابتدائية للبحث داخل الـ store
 
   setConversations: (conversations) =>
     set({
@@ -48,7 +49,6 @@ export const useMailStore = create<MailStore>((set, get) => ({
       selectedMail: conversation.messages.at(-1) ?? null,
     })),
 
-  // الإضافة هنا داخل الـ store بعد addConversation مباشرة
   openConversation: (conversation) =>
     set({
       selectedConversation: conversation,
@@ -102,4 +102,10 @@ export const useMailStore = create<MailStore>((set, get) => ({
       selectedMail: conversation?.messages.at(-1) ?? null,
     });
   },
+
+  // إضافة الـ Action لتحديث حالة البحث
+  setSearch: (search) =>
+    set({
+      search,
+    }),
 }));

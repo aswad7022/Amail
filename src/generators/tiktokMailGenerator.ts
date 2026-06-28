@@ -2,7 +2,7 @@ import type { Mail } from "../models/mail";
 
 export function generateTikTokMail(email: string): Mail {
   return {
-    id: crypto.randomUUID(),
+    id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
 
     sender: "TikTok",
     senderEmail: "security@tiktok.com",

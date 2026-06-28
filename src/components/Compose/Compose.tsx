@@ -55,7 +55,7 @@ export default function Compose() {
     const now = new Date();
 
     const mail: Mail = {
-      id: crypto.randomUUID(),
+      id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
       subject,
       body,
       from: account.email,

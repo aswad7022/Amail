@@ -1,133 +1,325 @@
 import {
+
   Star,
+
   Paperclip,
+
   Archive,
+
   Trash2,
+
   MailOpen,
+
 } from "lucide-react";
 
-import { useNavigate } from "react-router-dom";
+
+
+import { useNavigate, useParams } from "react-router-dom";
+
 import { useMailStore } from "../../store/mailStore";
 
+
+
 function formatDate(date: Date) {
+
   const now = new Date();
 
-  if (
-    date.toDateString() ===
-    now.toDateString()
-  ) {
+
+
+  if (date.toDateString() === now.toDateString()) {
+
     return date.toLocaleTimeString("en-US", {
+
       hour: "2-digit",
+
       minute: "2-digit",
+
     });
+
   }
 
+
+
   return date.toLocaleDateString("en-GB", {
+
     day: "2-digit",
+
     month: "short",
+
   });
+
 }
 
+
+
 export default function MailList() {
+
   const navigate = useNavigate();
 
-  const {
-    conversations,
-    selectConversation,
-  } = useMailStore();
+  const { id: currentRouteId } = useParams();
+
+
+
+  // جلب المحادثات، وظيفة التحديد، وقيمة البحث من الـ Store
+
+  const { conversations, selectConversation, search } = useMailStore();
+
+
+
+  // فلترة المحادثات بناءً على قيمة البحث المدخلة
+
+  const filteredConversations = conversations.filter((conversation) => {
+
+    const q = search.toLowerCase();
+
+
+
+    return (
+
+      conversation.sender.toLowerCase().includes(q) ||
+
+      conversation.subject.toLowerCase().includes(q) ||
+
+      conversation.preview.toLowerCase().includes(q) ||
+
+      conversation.messages.some((m) =>
+
+        m.body.toLowerCase().includes(q)
+
+      )
+
+    );
+
+  });
+
+
 
   return (
+
     <div className="flex-1 overflow-y-auto bg-white">
 
-      {conversations.map((conversation) => (
+      {/* رندرة القائمة المفلترة الجديدة بدلاً من القائمة الكاملة */}
 
-        <div
-          key={conversation.id}
-          onClick={() => {
-            selectConversation(conversation.id);
-            navigate(`/mail/${conversation.id}`);
-          }}
-          className="group flex items-center px-3 py-2 border-b border-[#f1f3f4] hover:bg-[#f2f6fc] cursor-pointer text-sm"
-        >
+      {filteredConversations.map((conversation) => {
 
-          {/* Checkbox مصغر مثل Gmail */}
-          <div className="w-8 flex justify-center">
-            <input
-              type="checkbox"
-              onClick={(e) => e.stopPropagation()}
-            />
-          </div>
+        const isSelected = conversation.id === currentRouteId;
 
-          {/* Star مصغر مثل Gmail */}
-          <div className="w-8 flex justify-center">
-            <Star
-              size={16}
-              className={
-                conversation.starred
-                  ? "fill-yellow-400 text-yellow-400"
-                  : "text-gray-400"
-              }
-            />
-          </div>
 
-          <div className="w-2" />
 
-          {/* الفحص الذكي لاسم MoneyGram */}
-          <div className="w-[180px] truncate font-medium">
-            {conversation.subject === "Request for Refund Status and Transaction Inquiry"
-              ? "MoneyGram"
-              : conversation.sender}
-          </div>
+        return (
 
-          {/* الـ subject + preview بأسلوب Gmail */}
-          <div className="flex-1 truncate text-gray-800">
-            <span
-              className={
-                conversation.unread
-                  ? "font-semibold"
-                  : ""
-              }
-            >
-              {conversation.subject}
-            </span>
+          <div
 
-            <span className="text-gray-500">
-              {" — "}
-              {conversation.preview}
-            </span>
-          </div>
+            key={conversation.id}
 
-          {/* أيقونة المرفقات يمين */}
-          <div className="w-6 flex justify-center">
-            {conversation.hasAttachment && (
-              <Paperclip
-                size={14}
-                className="text-gray-400"
+            onClick={() => {
+
+              selectConversation(conversation.id);
+
+              navigate(`/mail/${conversation.id}`);
+
+            }}
+
+            className={`group relative flex items-center rounded-lg border-b border-[#f1f3f4] px-4 py-[11px] cursor-pointer text-sm transition-all duration-150 hover:mx-2 hover:my-[2px] hover:z-10 hover:-translate-y-[1px] hover:border hover:border-[#dadce0] hover:shadow-[0_1px_3px_rgba(60,64,67,.3),0_4px_8px_3px_rgba(60,64,67,.15)] ${
+
+              isSelected
+
+                ? "bg-[#f2f6fc] hover:bg-[#e8f0fe]"
+
+                : "bg-white hover:bg-white"
+
+            }`}
+
+          >
+
+            {/* التحديث الجديد للـ Checkbox وحاويته */}
+
+            <div className="relative w-10 flex justify-center">
+
+              <input
+
+                type="checkbox"
+
+                className="cursor-pointer accent-blue-600 opacity-0 transition-all duration-150 group-hover:opacity-100"
+
+                onClick={(e) => e.stopPropagation()}
+
               />
-            )}
-          </div>
 
-          {/* التاريخ وأزرار التحكم السريعة عند الـ Hover */}
-          <div className="w-[90px] flex justify-end items-center">
+            </div>
 
-            <span className="group-hover:hidden text-right text-xs text-gray-500">
-              {formatDate(
-                conversation.messages.at(-1)!.date
+
+
+            <div className="w-10 flex justify-center">
+
+              <Star
+
+                size={16}
+
+                className={`cursor-pointer transition-all duration-150 hover:scale-110 ${
+
+                  conversation.starred
+
+                    ? "fill-yellow-400 text-yellow-400"
+
+                    : "text-gray-400 hover:text-gray-600"
+
+                }`}
+
+              />
+
+            </div>
+
+
+
+            <div className="w-2" />
+
+
+
+            <div
+
+              className={`w-[190px] truncate ${
+
+                conversation.unread
+
+                  ? "font-bold text-gray-900"
+
+                  : "font-medium text-gray-800"
+
+              }`}
+
+            >
+
+              {conversation.subject === "Request for Refund Status and Transaction Inquiry"
+
+                ? "MoneyGram"
+
+                : conversation.sender}
+
+            </div>
+
+
+
+            <div className="flex-1 truncate text-[14px]">
+
+              <span
+
+                className={
+
+                  conversation.unread
+
+                    ? "font-bold text-gray-900"
+
+                    : "text-gray-800"
+
+                }
+
+              >
+
+                {conversation.subject}
+
+              </span>
+
+
+
+              <span className="text-gray-500 font-normal">
+
+                {" — "}
+
+                {conversation.preview}
+
+              </span>
+
+            </div>
+
+
+
+            <div className="w-8 flex justify-center">
+
+              {conversation.hasAttachment && (
+
+                <Paperclip
+
+                  size={14}
+
+                  className="text-gray-400 transition-colors duration-150 group-hover:text-gray-600"
+
+                />
+
               )}
-            </span>
 
-            <div className="hidden group-hover:flex gap-2 text-gray-500">
-              <Archive size={16} className="hover:text-gray-800 cursor-pointer" />
-              <Trash2 size={16} className="hover:text-red-500 cursor-pointer" />
-              <MailOpen size={16} className="hover:text-gray-800 cursor-pointer" />
+            </div>
+
+
+
+            <div className="w-[110px] relative flex justify-end items-center pr-2">
+
+              <span
+
+                className={`text-right text-xs transition-all duration-150 group-hover:opacity-0 group-hover:translate-x-2 ${
+
+                  conversation.unread
+
+                    ? "font-bold text-gray-900"
+
+                    : "font-medium text-gray-500"
+
+                }`}
+
+              >
+
+                {formatDate(conversation.messages.at(-1)!.date)}
+
+              </span>
+
+
+
+              <div
+
+                className={`absolute right-2 flex items-center gap-1 text-gray-500 opacity-0 translate-x-2 pointer-events-none transition-all duration-150 group-hover:opacity-100 group-hover:translate-x-0 group-hover:pointer-events-auto ${
+
+                  isSelected ? "bg-[#e8f0fe]" : "bg-white"
+
+                }`}
+
+              >
+
+                <Archive
+
+                  size={17}
+
+                  className="p-1 rounded-full cursor-pointer transition-all duration-150 hover:scale-110 hover:bg-[#f1f3f4] hover:text-gray-900"
+
+                />
+
+                <Trash2
+
+                  size={17}
+
+                  className="p-1 rounded-full cursor-pointer transition-all duration-150 hover:scale-110 hover:bg-[#f1f3f4] hover:text-red-600"
+
+                />
+
+                <MailOpen
+
+                  size={17}
+
+                  className="p-1 rounded-full cursor-pointer transition-all duration-150 hover:scale-110 hover:bg-[#f1f3f4] hover:text-gray-900"
+
+                />
+
+              </div>
+
             </div>
 
           </div>
 
-        </div>
+        );
 
-      ))}
+      })}
 
     </div>
+
   );
-}
+
+} 

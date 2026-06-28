@@ -36,7 +36,7 @@ export default function MailViewer() {
     const now = new Date();
 
     const mail: Mail = {
-      id: crypto.randomUUID(),
+      id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
       subject: selectedConversation.subject,
       body: reply,
       from: currentAccount.email,
@@ -89,29 +89,43 @@ export default function MailViewer() {
 
   if (!selectedConversation) {
     return (
-      <div className="w-[420px] border-l border-gray-200 bg-white flex items-center justify-center text-gray-400">
+      <div className="w-[520px] border-l border-gray-200 bg-white flex items-center justify-center text-gray-400">
         Select an email
       </div>
     );
   }
 
   return (
-    /* التعديل الجديد والاختبار هنا على مستوى الحاوية الكبيرة */
+    /* ① تعديل عرض الحاوية لتصبح أعرض ومطابقة لأبعاد Gmail */
     <div
-      className="w-[420px] bg-white border-l border-gray-200 flex flex-col relative z-50"
+      className="w-[520px] bg-white border-l border-gray-200 flex flex-col relative z-50"
       style={{ pointerEvents: "auto" }}
     >
       
-      <div className="border-b p-5">
-        <div className="flex justify-between items-center">
-          <h2 className="text-xl font-semibold">
-            {selectedConversation.subject}
-          </h2>
-          <Star size={20} className="text-gray-400" />
+      {/* ② الـ Header الجديد مع أدوات التحكم (أرشفة، حذف، حظر، المزيد) */}
+      <div className="border-b bg-white px-5 py-3">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <h2 className="text-[22px] font-normal text-gray-800">
+              {selectedConversation.subject}
+            </h2>
+            <Star
+              size={18}
+              className="text-gray-400 hover:text-yellow-500 cursor-pointer"
+            />
+          </div>
+
+          <div className="flex items-center gap-2">
+            <button className="p-2 rounded-full hover:bg-gray-100">🗄️</button>
+            <button className="p-2 rounded-full hover:bg-gray-100">🗑️</button>
+            <button className="p-2 rounded-full hover:bg-gray-100">🚫</button>
+            <button className="p-2 rounded-full hover:bg-gray-100">⋮</button>
+          </div>
         </div>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-5 space-y-8">
+      {/* ⑤ تكبير المسافات الداخلية والحواشي للرسائل */}
+      <div className="flex-1 overflow-y-auto px-6 py-5 space-y-5">
         {selectedConversation.messages.map((mail) => (
           <div key={mail.id}>
             <div
@@ -119,29 +133,33 @@ export default function MailViewer() {
                 mail.direction === "outgoing" ? "justify-end" : "justify-start"
               }`}
             >
+              {/* ③ و ④ تعديل شكل وألوان الرسائل (خلفية زرقاء فاتحة للصادر، بيضاء وحواف رمادية للوارد) */}
               <div
-                className={`max-w-[90%] rounded-2xl px-4 py-3 ${
+                className={`max-w-[95%] rounded-xl border shadow-sm px-5 py-4 ${
                   mail.direction === "outgoing"
-                    ? "bg-blue-600 text-white"
-                    : "bg-gray-100"
+                    ? "bg-[#E8F0FE] border-blue-200 text-gray-900"
+                    : "bg-white border-gray-200"
                 }`}
               >
-                <div className="text-sm font-semibold mb-1">
+                {/* ⑥ تعديل حجم وخط اسم المرسل */}
+                <div className="text-[15px] font-semibold text-gray-900 mb-1">
                   {mail.sender}
                 </div>
 
-                <div className="whitespace-pre-wrap leading-7">
+                {/* ⑦ تعديل حجم وتباعد أسطر نص الرسالة */}
+                <div className="whitespace-pre-wrap text-[15px] leading-7 text-gray-800">
                   {mail.body}
                 </div>
 
                 {mail.hasAttachment && (
-                  <div className="mt-4 flex gap-2 items-center">
+                  <div className="mt-4 flex gap-2 items-center text-gray-600">
                     <Paperclip size={16} />
                     {mail.attachments[0]}
                   </div>
                 )}
 
-                <div className="mt-4 text-xs opacity-70">
+                {/* ⑧ تعديل خط وتباعد التاريخ */}
+                <div className="mt-5 text-xs text-gray-500">
                   {mail.date.toLocaleDateString()} {mail.time}
                 </div>
               </div>
@@ -155,8 +173,7 @@ export default function MailViewer() {
           {!isReplying && (
             <button
               onClick={() => {
-                console.log("Reply clicked");
-                alert("Reply clicked");
+                /* ⑫ تم حذف أسطر الـ console.log والـ alert غير الضرورية */
                 setIsReplying(true);
               }}
               className="flex items-center gap-2 text-sm hover:bg-gray-100 px-3 py-2 rounded-lg"
@@ -176,17 +193,20 @@ export default function MailViewer() {
 
         {isReplying && (
           <>
+            {/* ⑨ و ⑩ تعديل الـ textarea لتصبح أكبر، مريحة، وبحواف ناعمة مع تفعيل الـ focus */}
             <textarea
+              rows={7}
               value={reply}
               onChange={(e) => setReply(e.target.value)}
-              className="w-full h-32 border rounded-xl p-3 resize-none outline-none"
+              className="w-full min-h-[170px] rounded-2xl border border-gray-300 px-5 py-4 resize-none outline-none focus:border-blue-500"
               placeholder="Reply..."
             />
 
             <div className="flex justify-end mt-3">
+              {/* ⑪ تعديل تصميم ولون زر الإرسال المريح للعين المتناسق مع هوية جوجل الجديدة */}
               <button
                 onClick={sendReply}
-                className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-5 py-2 flex items-center gap-2"
+                className="bg-[#0B57D0] hover:bg-[#0842a0] text-white rounded-full px-7 py-3 flex items-center gap-2 transition"
               >
                 <Send size={16} />
                 Send

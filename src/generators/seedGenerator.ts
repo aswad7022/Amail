@@ -30,6 +30,7 @@ export function generateSeed(count: number): Account[] {
 
     account.sent = [timeline[0]];
 
+    // توليد مصفوفة الـ inbox أولاً
     account.inbox = [
       buildConversation(timeline),
 
@@ -37,6 +38,19 @@ export function generateSeed(count: number): Account[] {
         buildConversation([mail])
       ),
     ];
+
+    // تطبيق خوارزمية Fisher–Yates Shuffle لترتيب عشوائي مثالي
+    for (let i = account.inbox.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+
+      [
+        account.inbox[i],
+        account.inbox[j],
+      ] = [
+        account.inbox[j],
+        account.inbox[i],
+      ];
+    }
 
     account.drafts = [];
     account.spam = [];

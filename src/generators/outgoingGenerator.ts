@@ -38,7 +38,7 @@ function buildMail(
   date: Date
 ): Mail {
   return {
-    id: crypto.randomUUID(),
+    id: Math.random().toString(36).slice(2) + Date.now(),
 
     subject: FIRST_MESSAGE_SUBJECT,
 

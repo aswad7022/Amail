@@ -8,7 +8,7 @@ import {
 import { useNavigate } from "react-router-dom";
 import { useMailStore } from "../store/mailStore";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAccountStore } from "../store/accountStore";
 import { generateAutoReply } from "../generators/autoReplyGenerator";
 import type { Mail as MailType } from "../models/mail";
@@ -36,6 +36,17 @@ export default function Mail() {
 
   const [reply, setReply] = useState("");
   const [isReplying, setIsReplying] = useState(false);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    setLoading(true);
+
+    const timer = setTimeout(() => {
+      setLoading(false);
+    }, 2000);
+
+    return () => clearTimeout(timer);
+  }, [selectedConversation]);
 
   const sendReply = () => {
     if (
@@ -49,7 +60,7 @@ export default function Mail() {
     const now = new Date();
 
     const mail: MailType = {
-      id: crypto.randomUUID(),
+      id: globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`,
       subject: selectedConversation.subject,
       body: reply,
       from: currentAccount.email,
@@ -104,6 +115,18 @@ export default function Mail() {
     return (
       <div className="p-10">
         Conversation not found
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="h-full bg-[#f6f8fc] p-4">
+        <div className="bg-white rounded-2xl h-full flex items-center justify-center">
+          <div className="text-gray-500 text-lg">
+            Loading message...
+          </div>
+        </div>
       </div>
     );
   }

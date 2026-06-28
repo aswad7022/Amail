@@ -27,19 +27,30 @@ export const useAccountStore =
 
     currentAccount: null,
 
-    setAccounts: (accounts) =>
+    setAccounts: (accounts) => {
+      const savedId = Number(localStorage.getItem("currentAccountId"));
+
+      const current =
+        accounts.find((a) => a.id === savedId) ??
+        accounts[0] ??
+        null;
+
       set({
         accounts,
-        currentAccount:
-          accounts[0] ?? null,
-      }),
+        currentAccount: current,
+      });
+    },
 
-    setCurrentAccount: (
-      account
-    ) =>
+    setCurrentAccount: (account) => {
+      localStorage.setItem(
+        "currentAccountId",
+        String(account.id)
+      );
+
       set({
         currentAccount: account,
-      }),
+      });
+    },
 
     addSentMail: (
       mail
