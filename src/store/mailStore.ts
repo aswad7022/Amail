@@ -8,22 +8,14 @@ interface MailStore {
   allConversations: Conversation[];
   selectedConversation: Conversation | null;
   selectedMail: Mail | null;
-  search: string; // إضافة حالة البحث داخل الـ interface
+  search: string;
   setConversations: (conversations: Conversation[]) => void;
   addConversation: (conversation: Conversation) => void;
   openConversation: (conversation: Conversation) => void;
-
-  replyToConversation: (
-    conversationId: string,
-    mail: Mail
-  ) => void;
-
-  filterCategory: (
-    category: "primary" | "social" | "promotions" | "updates"
-  ) => void;
-
+  replyToConversation: (conversationId: string, mail: Mail) => void;
+  filterCategory: (category: "primary" | "social" | "promotions" | "updates") => void;
   selectConversation: (id: string) => void;
-  setSearch: (search: string) => void; // إضافة الـ Action داخل الـ interface
+  setSearch: (search: string) => void;
 }
 
 export const useMailStore = create<MailStore>((set, get) => ({
@@ -31,7 +23,7 @@ export const useMailStore = create<MailStore>((set, get) => ({
   allConversations: [],
   selectedConversation: null,
   selectedMail: null,
-  search: "", // إضافة القيمة الابتدائية للبحث داخل الـ store
+  search: "",
 
   setConversations: (conversations) =>
     set({
@@ -71,8 +63,7 @@ export const useMailStore = create<MailStore>((set, get) => ({
         };
       });
 
-      const current =
-        conversations.find((c) => c.id === conversationId) ?? null;
+      const current = conversations.find((c) => c.id === conversationId) ?? null;
 
       return {
         conversations,
@@ -83,9 +74,7 @@ export const useMailStore = create<MailStore>((set, get) => ({
     }),
 
   filterCategory: (category) => {
-    const filtered = get().allConversations.filter(
-      (c) => c.category === category
-    );
+    const filtered = get().allConversations.filter((c) => c.category === category);
 
     set({
       conversations: filtered,
@@ -103,7 +92,6 @@ export const useMailStore = create<MailStore>((set, get) => ({
     });
   },
 
-  // إضافة الـ Action لتحديث حالة البحث
   setSearch: (search) =>
     set({
       search,
